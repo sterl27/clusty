@@ -1,0 +1,62 @@
+# NVIDIA Kubernetes Device Plugin — DaemonSet
+#
+# Constrained to the gpu-node via nodeSelector (gpu=true).
+# Uses the k3s-specific kubelet device-plugins path instead of the default
+# /var/lib/kubelet/device-plugins — k3s nests kubelet state under
+# /var/lib/rancher/k3s/agent/kubelet/.
+#
+# FAIL_ON_INIT_ERROR=false keeps the plugin running even when the WSL2
+# GPU paravirt layer reports a non-fatal init warning on first start.
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-device-plugin-daemonset
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: nvidia-device-plugin-ds
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: nvidia-device-plugin-ds
+    spec:
+      priorityClassName: system-node-critical
+
+      # Only schedule on nodes labeled gpu=true
+      nodeSelector:
+        gpu: "true"
+
+      # Tolerate the taint we add to gpu-node in scripts/02-agent-wsl2.sh
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+
+      # The device plugin itself must run under the NVIDIA runtime so it can
+      # enumerate /dev/nvidia* via the host.
+      runtimeClassName: nvidia
+
+      containers:
+        - name: nvidia-device-plugin-ctr
+          image: nvcr.io/nvidia/k8s-device-plugin:v0.16.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: FAIL_ON_INIT_ERROR
+              value: "false"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            # k3s stores kubelet state here instead of /var/lib/kubelet
+            - name: device-plugin
+              mountPath: /var/lib/kubelet/device-plugins
+
+      volumes:
+        - name: device-plugin
+          hostPath:
+            path: /var/lib/rancher/k3s/agent/kubelet/device-plugins
