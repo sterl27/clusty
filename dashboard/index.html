@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenClaw Mission Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar glass">
+        <div class="brand">
+          <div class="brand-orb"></div>
+          <div>
+            <h1>OpenClaw</h1>
+            <p>Mission Control</p>
+          </div>
+        </div>
+
+        <nav class="nav-links">
+          <a href="#cluster" class="active">Cluster Overview</a>
+          <a href="#agents">Agents</a>
+          <a href="#nodes">Nodes</a>
+          <a href="#gpu">GPU</a>
+          <a href="#network">Network</a>
+          <a href="#alerts">Alerts</a>
+        </nav>
+
+        <div class="status-card">
+          <h3>Realtime Feed</h3>
+          <p id="feedStatus" class="pill pill-live">LIVE</p>
+          <small id="feedMeta">Mock stream @ 1s</small>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar glass">
+          <div>
+            <h2>Mission Control Dashboard</h2>
+            <p class="sub">Unified view of agents, nodes, cluster health, GPU, and network in realtime.</p>
+          </div>
+          <div class="top-actions">
+            <input id="searchInput" type="text" placeholder="Search agent / node / namespace" />
+            <button id="pauseBtn" class="btn">Pause Stream</button>
+          </div>
+        </header>
+
+        <section id="cluster" class="cards-row">
+          <article class="metric-card glass">
+            <h4>Cluster Health</h4>
+            <div class="metric" id="clusterHealth">99.2%</div>
+            <div class="tiny">Last 5 min</div>
+          </article>
+          <article class="metric-card glass">
+            <h4>Active Agents</h4>
+            <div class="metric" id="activeAgents">0</div>
+            <div class="tiny" id="agentsDelta">+0 in 1m</div>
+          </article>
+          <article class="metric-card glass">
+            <h4>GPU Utilization</h4>
+            <div class="metric" id="gpuUtil">0%</div>
+            <div class="tiny" id="gpuMem">0 / 0 GiB</div>
+          </article>
+          <article class="metric-card glass">
+            <h4>Network Throughput</h4>
+            <div class="metric" id="netThroughput">0 Gbps</div>
+            <div class="tiny" id="netErr">0 dropped packets</div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article id="agents" class="panel glass">
+            <div class="panel-head">
+              <h3>OpenClaw Agents</h3>
+              <span class="tag" id="agentCountTag">0 total</span>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Role</th>
+                  <th>Node</th>
+                  <th>Status</th>
+                  <th>Latency</th>
+                  <th>CPU</th>
+                </tr>
+              </thead>
+              <tbody id="agentsTable"></tbody>
+            </table>
+          </article>
+
+          <article id="nodes" class="panel glass">
+            <div class="panel-head">
+              <h3>Cluster Nodes</h3>
+              <span class="tag" id="nodeCountTag">0 nodes</span>
+            </div>
+            <div id="nodeCards" class="node-cards"></div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article id="gpu" class="panel glass">
+            <div class="panel-head">
+              <h3>GPU Fleet</h3>
+              <span class="tag" id="gpuCountTag">0 GPUs</span>
+            </div>
+            <div id="gpuBars" class="gpu-bars"></div>
+          </article>
+
+          <article id="network" class="panel glass">
+            <div class="panel-head">
+              <h3>Network Matrix</h3>
+              <span class="tag" id="networkTag">Realtime</span>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Path</th>
+                  <th>RTT</th>
+                  <th>Throughput</th>
+                  <th>Loss</th>
+                </tr>
+              </thead>
+              <tbody id="networkTable"></tbody>
+            </table>
+          </article>
+        </section>
+
+        <section id="alerts" class="panel glass">
+          <div class="panel-head">
+            <h3>Alert Stream</h3>
+            <span class="tag" id="alertCountTag">0 open</span>
+          </div>
+          <ul id="alertList" class="alert-list"></ul>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

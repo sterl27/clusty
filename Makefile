@@ -18,7 +18,8 @@ CONFIG      := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))config.env
 # Load config values for targets that need them
 -include $(CONFIG)
 
-.PHONY: all win-wslconfig server agent nvidia-runtime gpu-plugin openrouter \
+
+.PHONY: all win-wslconfig server agent nvidia-runtime gpu-plugin openrouter dashboard \
 	kubeconfig status gpu-test clean help
 
 help:  ## Show this help
@@ -49,6 +50,10 @@ gpu-plugin: kubeconfig  ## Deploy NVIDIA RuntimeClass + device plugin DaemonSet
 # ── Step 5: OpenRouter-backed UI ─────────────────────────────────────────────
 openrouter: kubeconfig  ## Deploy Open WebUI configured to use OpenRouter API
 	bash $(SCRIPT_DIR)/05-openrouter.sh
+
+# ── Local Mission Control dashboard ──────────────────────────────────────────
+dashboard:  ## Serve Mission Control dashboard at http://localhost:8088/dashboard/
+	python3 -m http.server 8088
 
 # ── kubeconfig helper ─────────────────────────────────────────────────────────
 kubeconfig:  ## Fetch kubeconfig from server (writes to ~/.kube/config)
