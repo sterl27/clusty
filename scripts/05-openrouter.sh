@@ -30,7 +30,10 @@ kubectl -n "${NAMESPACE}" create secret generic openrouter-api \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "==> Applying Open WebUI deployment..."
-kubectl apply -f "${ROOT_DIR}/manifests/openwebui-openrouter.yaml"
+TMP_MANIFEST="$(mktemp)"
+sed "s/__NAMESPACE__/${NAMESPACE}/g" "${ROOT_DIR}/manifests/openwebui-openrouter.yaml" > "${TMP_MANIFEST}"
+kubectl apply -f "${TMP_MANIFEST}"
+rm -f "${TMP_MANIFEST}"
 
 echo "==> Waiting for rollout..."
 kubectl -n "${NAMESPACE}" rollout status deployment/open-webui --timeout=180s

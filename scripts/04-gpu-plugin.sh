@@ -7,10 +7,11 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFESTS="${SCRIPT_DIR}/../manifests"
+# shellcheck source=../config.env
+source "${SCRIPT_DIR}/../config.env"
 
 # ── kubeconfig: prefer local, fall back to from the server ────────────────────
 if [[ ! -f "${HOME}/.kube/config" ]]; then
-  source "${SCRIPT_DIR}/../config.env"
   echo "==> No local kubeconfig — fetching from ${SERVER_SSH_USER}@${SERVER_IP}..."
   mkdir -p "${HOME}/.kube"
   ssh "${SERVER_SSH_USER}@${SERVER_IP}" "sudo cat /etc/rancher/k3s/k3s.yaml" \
@@ -31,14 +32,16 @@ kubectl rollout status daemonset/nvidia-device-plugin-daemonset \
   -n kube-system --timeout=120s
 
 echo ""
-echo "==> Allocatable resources on gpu-node:"
-kubectl get node gpu-node \
-  -o jsonpath='{range .status.allocatable}{.k}{"\t"}{.v}{"\n"}{end}' 2>/dev/null \
-  || kubectl get node gpu-node -o jsonpath='{.status.allocatable}' \
-  | python3 -m json.tool
+echo "==> Allocatable resources on ${GPU_NODE_NAME}:"
+ALLOCATABLE_JSON="$(kubectl get node "${GPU_NODE_NAME}" -o jsonpath='{.status.allocatable}')"
+if command -v python3 &>/dev/null; then
+  echo "${ALLOCATABLE_JSON}" | python3 -m json.tool
+else
+  echo "${ALLOCATABLE_JSON}"
+fi
 
 echo ""
 echo "==> nvidia.com/gpu capacity:"
-kubectl get node gpu-node \
+kubectl get node "${GPU_NODE_NAME}" \
   -o jsonpath='{.status.allocatable.nvidia\.com/gpu}' \
   && echo " GPU(s) allocatable" || echo "(device plugin may still be initializing — retry in 30s)"

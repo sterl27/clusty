@@ -2,7 +2,7 @@
 # Copies .wslconfig to your Windows home, enabling WSL2 mirrored networking
 # so the GPU agent (WSL2) is reachable from the k3s server at 192.168.0.28.
 
-$wslconfig = "$PSScriptRoot\..\wslconfig"
+$wslconfig = "$PSScriptRoot\..\.wslconfig"
 $dest      = "$env:USERPROFILE\.wslconfig"
 
 if (Test-Path $dest) {
@@ -11,7 +11,7 @@ if (Test-Path $dest) {
     Write-Host "Existing .wslconfig backed up to $backup"
 }
 
-# Strip leading dot — the repo stores it as 'wslconfig', Windows needs '.wslconfig'
+# Repo stores it as '.wslconfig' and Windows expects it at '%USERPROFILE%\.wslconfig'.
 Copy-Item -Path $wslconfig -Destination $dest -Force
 Write-Host "Copied .wslconfig to $dest"
 
